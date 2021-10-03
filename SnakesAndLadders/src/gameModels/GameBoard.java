@@ -32,20 +32,43 @@ public class GameBoard extends JPanel {
 	private final int /*humans=1, bots=2,*/ totalAvatarIcons=5;
 	private ImageIcon backgroundImage;
 	private JLabel playingBoard, eggGif, explosionGif;
-	private  List< User > players;
+	private  List< User > humanPlayers;
+	private  List< Bot > botPlayers;
 	//private Timer timer, timer2;
 	public ScheduledExecutorService scheduler;
 	private int squaresWithLadders[][];
 	private int squaresWithSnakes[][];
 	private int delay=450, period=20, movesFor1Square=24;
 	private final int durationEggGif = 1000, durationExplosionGif = 1440; // time in miliseconds
+	private ScheduledFuture<?> lastPreformedMovementTask;
 	
 	
+	
+	public GameBoard() {
+		
+		this.backgroundImage = new ImageIcon( getClass().getResource( "/images/playing_board.png" ) );
+		backgroundImage = Dice.resizeImg( 640, 590, backgroundImage, true);
+		
+		initGameBoard();
+		 
+		this.setLayout(null);
+		this.setOpaque(true);
+		this.setBackground(Color.CYAN);		
+	}
 	
 	public GameBoard(ImageIcon img, int _width, int _height) {
 	
 		this.backgroundImage = img;
 		backgroundImage = Dice.resizeImg(_width, _height, backgroundImage, true);
+		
+		initGameBoard();
+											 
+		this.setLayout(null);
+		this.setOpaque(true);
+		this.setBackground(Color.CYAN);		
+	}
+	
+	public void initGameBoard() {
 		
 		playingBoard = new JLabel();
 		playingBoard.setLocation(0, 0);
@@ -69,13 +92,12 @@ public class GameBoard extends JPanel {
 		this.setExplosionGifSize(55, 55);
 		
 		
-		players = new ArrayList<User>();
-		fillPlayersList(1, 2);
+		humanPlayers = new ArrayList<>();
+		botPlayers = new ArrayList<>();
+		//fillPlayersList(1, 2);
 		
-		//this.timer = new Timer();
 		this.scheduler = Executors.newScheduledThreadPool(1);
-		//this.taskList = new ArrayList<>();
-		//runList = new ArrayList<>();
+		
 		
 		this.squaresWithLadders = new int[][] { {4, 14}, {8, 32}, {20, 38},
 												{28, 84}, {40, 59}, {58, 83},
@@ -87,17 +109,16 @@ public class GameBoard extends JPanel {
 											   {62, 19}, {74, 70}, {85, 33},
 											   {91, 71}, {98, 80}
 											 };
-
-											 
-		this.setLayout(null);
-		this.setOpaque(true);
-		this.setBackground(Color.CYAN);
 		
 	}
 	
 	public void setAvatarsSize(int width, int height) {
 		
-		for (User user : players) {
+		for (User user : humanPlayers) {
+			user.setAvatarSize(width, height);
+		}
+		
+		for (User user : botPlayers) {
 			user.setAvatarSize(width, height);
 		}
 	}
@@ -118,7 +139,7 @@ public class GameBoard extends JPanel {
 		explosionGif.setIcon( explosionIcon );
 	}
 	
-	
+	/*
 	public void addPlayerToBoard(int playersIndex, int square) {
 		
 		int temp[] = determineSquareCoords(square);
@@ -133,7 +154,7 @@ public class GameBoard extends JPanel {
 		user.setLocation( temp[0] , temp[1] ); 
 		this.add(user, 0);						 
 	}
-	
+	*/
 	
 	public void addPlayerToBoard(User user, int square) {
 		
@@ -149,11 +170,15 @@ public class GameBoard extends JPanel {
 		this.add(user, 0);						 
 	}
 	
-	public List<User> getPlayers() {
-		return players;
+	public List<User> getHumanPlayers() {
+		return humanPlayers;
+	}
+	
+	public List<Bot> getBotPlayers() {
+		return botPlayers;
 	}
 
-	public void fillPlayersList( int humans, int bots ) {		
+	public void fillPlayersLists( int humans, int bots ) {		
 		
 		Random random = new Random();
 		ArrayList<Integer> avatarsIdArray = new ArrayList<>();
@@ -167,11 +192,11 @@ public class GameBoard extends JPanel {
 			}
 			
 			if(i<humans) {
-				players.add( new User(num, i+1) );
+				humanPlayers.add( new User(num, i+1) );
 				avatarsIdArray.add(num);		
 			}
 			else {
-				players.add( new Bot(num, i+1) );
+				botPlayers.add( new Bot(num, i+1) );
 				avatarsIdArray.add(num);			
 			}
 		}
@@ -218,7 +243,8 @@ public class GameBoard extends JPanel {
 			
 		
 		ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(myTask, delay, period, TimeUnit.MILLISECONDS);
-			
+		lastPreformedMovementTask = taskHandle;	
+		
 		Runnable canceler = new Runnable() {
 			
 			@Override
@@ -282,7 +308,7 @@ public class GameBoard extends JPanel {
 		
 		
 		ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
-		
+		lastPreformedMovementTask = taskHandle;
 		
 		Runnable canceler = new Runnable() {
 			
@@ -574,7 +600,8 @@ public class GameBoard extends JPanel {
 			
 			
 			ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(myTask, delay, period, TimeUnit.MILLISECONDS);
-						
+			lastPreformedMovementTask = taskHandle;			
+			
 			Runnable canceler = new Runnable() {
 				
 				@Override
@@ -661,7 +688,7 @@ public class GameBoard extends JPanel {
 		
 		
 		ScheduledFuture<?> explosionHandle = scheduler.scheduleAtFixedRate(explosionTask, delay, this.durationExplosionGif, TimeUnit.MILLISECONDS);
-		
+		lastPreformedMovementTask = explosionHandle;
 		
 		Runnable eggTask = new Runnable() {
 			
@@ -698,8 +725,9 @@ public class GameBoard extends JPanel {
 		};// END eggTask
 		
 		int eggTaskDelay = delay + this.durationExplosionGif + this.durationEggGif;
-		ScheduledFuture<?> eggHandle = scheduler.scheduleAtFixedRate(eggTask, eggTaskDelay,  this.durationEggGif, TimeUnit.MILLISECONDS); 
 		
+		ScheduledFuture<?> eggHandle = scheduler.scheduleAtFixedRate(eggTask, eggTaskDelay,  this.durationEggGif, TimeUnit.MILLISECONDS); 
+		lastPreformedMovementTask = eggHandle;
 		
 		Runnable canceler = new Runnable() {
 			
@@ -722,7 +750,12 @@ public class GameBoard extends JPanel {
 		
 		
 	}// END method downTheSnake
+
 	
+	
+	public ScheduledFuture<?> getLastPreformedMovementTask() {
+		return lastPreformedMovementTask;
+	}
 		
 	
 }// END class GameBoard

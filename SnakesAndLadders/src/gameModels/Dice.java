@@ -12,8 +12,8 @@ import javax.swing.SwingUtilities;
 
 public class Dice extends JLabel {
 	
-	public static int DICE_WIDTH;
-	public static int DICE_HEIGHT;
+	public int DICE_WIDTH;
+	public int DICE_HEIGHT;
 	
 	private int currentFace;
 	private ImageIcon diceIcon, rotatingDice;
@@ -21,8 +21,8 @@ public class Dice extends JLabel {
 	
 	public Dice(int width, int height) {
 	
-		Dice.DICE_WIDTH = width;
-		Dice.DICE_HEIGHT = height;
+		this.DICE_WIDTH = width;
+		this.DICE_HEIGHT = height;
 		this.currentFace=1;
 		this.diceIcon= new ImageIcon("src/images/dice_"+ this.currentFace +".png");;
 		this.rotatingDice = new ImageIcon("src/images/dice_moving.gif");
@@ -49,8 +49,7 @@ public class Dice extends JLabel {
 			}
 		} );
 		
-		
-		
+	
 		Timer timer = new Timer();
 		TimerTask timerTask = new TimerTask() {
 			
@@ -58,7 +57,8 @@ public class Dice extends JLabel {
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub									
+				// TODO Auto-generated method stub
+				setIcon(rotatingDice);
 				if(ctr==1) {
 					
 					
@@ -70,7 +70,7 @@ public class Dice extends JLabel {
 							setIcon(diceIcon);
 							
 						}
-					} );
+					} ); 
 					//setIcon(diceIcon);
 					timer.cancel();
 				}		
@@ -87,15 +87,16 @@ public class Dice extends JLabel {
 	public int rollDice() {
 		
 		int num = random.nextInt(6)+1;
-		diceIcon = new ImageIcon("src/images/dice_"+ num +".png");
+		
+		return num;
+	}
+	
+	public void setDiceValue(int value) {
+		
+		diceIcon = new ImageIcon("src/images/dice_"+ value +".png");
 		diceIcon = resizeImg(DICE_WIDTH, DICE_HEIGHT, diceIcon, true);
-		//this.setVisible(false);
-		
-		//spinDice(this);		
-		currentFace = num;		
-		setIcon(diceIcon);	
-		
-		return currentFace;
+		currentFace = value;					
+		setIcon(diceIcon);
 	}
 	
 	

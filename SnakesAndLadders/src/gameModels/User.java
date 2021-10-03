@@ -65,26 +65,10 @@ public class User extends JLabel {
 		return flag;
 	}
 	
-	@Override
-	public boolean equals(Object otherUser) {
-		
-		boolean flag = false;
-		
-		if( this.AvatarID==((User) otherUser).getAvatarID() &&  this.isBot==((User) otherUser).isBot() ) {
-			flag=true;
-		}
-		
-		return flag;
-	}
 
 	public boolean isBot() {
 		return isBot;
 	}
-	
-	/*
-	public void setBot(boolean isBot) {
-		this.isBot = isBot;
-	} */
 
 	public ImageIcon getAvatar() {
 		return avatar;
@@ -104,6 +88,14 @@ public class User extends JLabel {
 
 	public int getAvatarID() {
 		return AvatarID;
+	}
+	
+	public int getTurn() {
+		return turn;
+	}
+
+	public void setTurn(int turn) {
+		this.turn = turn;
 	}
 
 
