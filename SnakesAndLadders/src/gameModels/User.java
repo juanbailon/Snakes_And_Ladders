@@ -5,9 +5,10 @@ import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
+import gameControls.ControlGame;
 import gameViews.GameGUI;
 
-public class User extends JLabel {
+public class User extends JLabel  implements Runnable {
 	
 	private static int AVATAR_WIDTH, AVATAR_HEIGHT;
 	
@@ -16,18 +17,29 @@ public class User extends JLabel {
 	private int currentSquare, turn;
 	private Dice dice;
 	private int AvatarID, boardCoordinates[];
+	private ControlGame controlGame;
 	
-	public User( int avatarId, int turn ) {
+	public User( int avatarId, int turn, boolean isBot ) {
 		
-		this.isBot = false;
+		this.isBot = isBot;
 		this.turn = turn;
 		this.currentSquare = 0;
 		this.AvatarID = avatarId;
 		this.boardCoordinates = new int[2];
 		
+		this.dice = null;
+		this.controlGame = null;
+		
 		selectAvatar( this.AvatarID );
 		AVATAR_WIDTH = avatar.getIconWidth();
 		AVATAR_HEIGHT = avatar.getIconHeight();
+	}
+	
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		controlGame.turns(this);
 	}
 	
 	
@@ -48,12 +60,6 @@ public class User extends JLabel {
 		this.setIcon(avatar);
 	}
 	
-	public void moveForward(int steps) {
-		
-		
-		
-		
-	}
 	
 	public boolean equalAvatars(User otherUser) {
 		
@@ -65,6 +71,25 @@ public class User extends JLabel {
 		return flag;
 	}
 	
+	
+	public ControlGame getControlGame() {
+		return controlGame;
+	}
+
+	public void setControlGame(ControlGame controlGame) {
+		this.controlGame = controlGame;
+	}
+	
+
+	public Dice getDice() {
+		return dice;
+	}
+
+
+	public void setDice(Dice dice) {
+		this.dice = dice;
+	}
+
 
 	public boolean isBot() {
 		return isBot;
@@ -123,5 +148,6 @@ public class User extends JLabel {
 	public int getBoardCoordinateY() {
 		return this.boardCoordinates[1];
 	}
+
 
 }

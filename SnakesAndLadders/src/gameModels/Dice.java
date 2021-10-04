@@ -3,12 +3,15 @@ package gameModels;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+
+import gameControls.ControlGame;
 
 public class Dice extends JLabel {
 	
@@ -18,6 +21,10 @@ public class Dice extends JLabel {
 	private int currentFace;
 	private ImageIcon diceIcon, rotatingDice;
 	private Random random;
+	private ControlGame controlGame = null;
+	public ScheduledExecutorService scheduler;
+	private ScheduledFuture<?> spinDiceTask;
+	
 	
 	public Dice(int width, int height) {
 	
@@ -31,63 +38,65 @@ public class Dice extends JLabel {
 		this.diceIcon = resizeImg(DICE_WIDTH, DICE_HEIGHT, this.diceIcon, true);
 		this.rotatingDice = resizeImg(DICE_WIDTH, DICE_HEIGHT, this.rotatingDice, false);
 		
+		this.scheduler = Executors.newSingleThreadScheduledExecutor();
+		
 		this.setPreferredSize( new Dimension(DICE_WIDTH, DICE_HEIGHT) );
 		this.setIcon( this.diceIcon );
-		//this.setVisible(false);
+
 	}
 	
 	
 	public void spinDice() {
 		
-		SwingUtilities.invokeLater( new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				setIcon(rotatingDice);
-				
-			}
-		} );
 		
-	
-		Timer timer = new Timer();
-		TimerTask timerTask = new TimerTask() {
+		Runnable myTask = new Runnable() {
 			
 			int ctr=0;
-			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				setIcon(rotatingDice);
-				if(ctr==1) {
-					
-					
-					SwingUtilities.invokeLater( new Runnable() {
-						
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							setIcon(diceIcon);
-							
-						}
-					} ); 
-					//setIcon(diceIcon);
-					timer.cancel();
-				}		
-				ctr++;					
+				
+				if( ctr==0 ) {
+					setIcon(rotatingDice);
+				}
+				else {
+					setIcon(diceIcon);
+					scheduler.notifyAll();	
+				}
+				ctr++;
 			}
 		};
 		
-		//SwingUtilities.invokeLater(timerTask);
 		
-		timer.scheduleAtFixedRate(timerTask, 10, 530);
+		ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(myTask, 10, 530, TimeUnit.MILLISECONDS);
+		spinDiceTask = taskHandle;
+		
+		
+		Runnable canceler = new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				while( !taskHandle.isDone() ) {
+					try {
+						this.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				taskHandle.cancel(false);
+			}
+		};
+		
+		scheduler.schedule(canceler, 1, TimeUnit.MICROSECONDS);
+		
 	}
 	
 	
-	public int rollDice() {
+	public synchronized int rollDice() {
 		
 		int num = random.nextInt(6)+1;
-		
+			
 		return num;
 	}
 	
@@ -133,7 +142,20 @@ public class Dice extends JLabel {
 		this.diceIcon = image;
 		this.setIcon(image);
 	}
-	
-	
 
+
+	public ControlGame getControlGame() {
+		return controlGame;
+	}
+
+	public void setControlGame(ControlGame controlGame) {
+		this.controlGame = controlGame;
+	}
+
+
+	public ScheduledFuture<?> getSpinDiceTask() {
+		return spinDiceTask;
+	}
+	
+	
 }

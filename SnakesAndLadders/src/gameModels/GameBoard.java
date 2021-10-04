@@ -1,43 +1,29 @@
 package gameModels;
 
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+
 
 public class GameBoard extends JPanel {
 
 	public static int FIRTS_SQUARE_X=95, FIRTS_SQUARE_Y=473, DELTA_X=47, DELTA_Y=47;
 	
-	private final int /*humans=1, bots=2,*/ totalAvatarIcons=5;
+	private final int  totalAvatarIcons=5;
 	private ImageIcon backgroundImage;
 	private JLabel playingBoard, eggGif, explosionGif;
-	private  List< User > humanPlayers;
-	private  List< Bot > botPlayers;
-	//private Timer timer, timer2;
+	private  List< User > players;
 	public ScheduledExecutorService scheduler;
-	private int squaresWithLadders[][];
-	private int squaresWithSnakes[][];
+	private int squaresWithLadders[][] , squaresWithSnakes[][];
 	private int delay=450, period=20, movesFor1Square=24;
 	private final int durationEggGif = 1000, durationExplosionGif = 1440; // time in miliseconds
 	private ScheduledFuture<?> lastPreformedMovementTask;
@@ -92,9 +78,7 @@ public class GameBoard extends JPanel {
 		this.setExplosionGifSize(55, 55);
 		
 		
-		humanPlayers = new ArrayList<>();
-		botPlayers = new ArrayList<>();
-		//fillPlayersList(1, 2);
+		players = new ArrayList<>();
 		
 		this.scheduler = Executors.newScheduledThreadPool(1);
 		
@@ -114,13 +98,9 @@ public class GameBoard extends JPanel {
 	
 	public void setAvatarsSize(int width, int height) {
 		
-		for (User user : humanPlayers) {
+		for (User user : players) {
 			user.setAvatarSize(width, height);
-		}
-		
-		for (User user : botPlayers) {
-			user.setAvatarSize(width, height);
-		}
+		}				
 	}
 	
 	public void setEggGifSize(int width, int height) {
@@ -139,7 +119,7 @@ public class GameBoard extends JPanel {
 		explosionGif.setIcon( explosionIcon );
 	}
 	
-	/*
+	
 	public void addPlayerToBoard(int playersIndex, int square) {
 		
 		int temp[] = determineSquareCoords(square);
@@ -154,7 +134,7 @@ public class GameBoard extends JPanel {
 		user.setLocation( temp[0] , temp[1] ); 
 		this.add(user, 0);						 
 	}
-	*/
+	
 	
 	public void addPlayerToBoard(User user, int square) {
 		
@@ -170,13 +150,10 @@ public class GameBoard extends JPanel {
 		this.add(user, 0);						 
 	}
 	
-	public List<User> getHumanPlayers() {
-		return humanPlayers;
+	public List<User> getPlayers() {
+		return players;
 	}
 	
-	public List<Bot> getBotPlayers() {
-		return botPlayers;
-	}
 
 	public void fillPlayersLists( int humans, int bots ) {		
 		
@@ -192,11 +169,11 @@ public class GameBoard extends JPanel {
 			}
 			
 			if(i<humans) {
-				humanPlayers.add( new User(num, i+1) );
+				players.add( new User(num, i+1, false) );
 				avatarsIdArray.add(num);		
 			}
 			else {
-				botPlayers.add( new Bot(num, i+1) );
+				players.add( new User(num, i+1, true) );
 				avatarsIdArray.add(num);			
 			}
 		}
@@ -212,8 +189,7 @@ public class GameBoard extends JPanel {
 		int final_y = current_y;
 		
 		user.setBoardCoordinateX( user.getBoardCoordinateX() + steps );
-		//user.setCurrentSquare( user.getCurrentSquare() + steps );
-		//movingHorizontally=true;
+		
 		
 		Runnable myTask = new Runnable() {
 						
@@ -231,9 +207,7 @@ public class GameBoard extends JPanel {
 					ctr++;
 				}
 				else {
-					System.out.println("%%%%%%%%%%  x_coord: "+ user.getBoardCoordinateX());
-					//user.setBoardCoordinateX( user.getBoardCoordinateX() + steps );
-					//System.out.println( user.getBoardCoordinateX() );
+					System.out.println("%%% new x_coord: "+ user.getBoardCoordinateX());					
 					
 					scheduler.notifyAll();											
 				}
@@ -250,25 +224,21 @@ public class GameBoard extends JPanel {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub	
-			//	System.out.println(" _____###### HH___ " + taskHandle.isDone() );
-				
-				
+
 				while( !taskHandle.isDone() ) { 
 					try {
 						this.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
-				//System.out.println(" _____###### HH___ 2" + taskHandle.isDone() );
+
 				taskHandle.cancel(false);				
 			}
 		};
 			
 			
-		scheduler.schedule(canceler, 1, TimeUnit.MILLISECONDS);
-		
+		scheduler.schedule(canceler, 1, TimeUnit.MILLISECONDS);		
 	}
 	
 	
@@ -280,7 +250,6 @@ public class GameBoard extends JPanel {
 		int final_y = current_y - (DELTA_Y*steps); 		
 		
 		user.setBoardCoordinateY( user.getBoardCoordinateY() + steps );
-		//user.setCurrentSquare( user.getCurrentSquare() + steps );
 		
 		Runnable task = new Runnable() {
 			
@@ -297,8 +266,7 @@ public class GameBoard extends JPanel {
 					ctr++;
 				}
 				else {
-					//user.setBoardCoordinateY( user.getBoardCoordinateY() + steps );
-					System.out.println("$$$$$$$$$$$$$$ Y_coord: "+ user.getBoardCoordinateY());
+					System.out.println("$$$ new Y_coord: "+ user.getBoardCoordinateY());
 					
 					scheduler.notifyAll();
 				}
@@ -315,13 +283,11 @@ public class GameBoard extends JPanel {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-		//		System.out.println(" _____###### HH___ " + taskHandle.isDone() );
-				
+
 				while( !taskHandle.isDone() ) { 
 					try {
 						this.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
@@ -334,9 +300,7 @@ public class GameBoard extends JPanel {
 	
 	
 	
-	public void moveForward(User user,int steps) {
-		
-		//System.out.println("currentsquare: -> "+user.getCurrentSquare());
+	public void moveForward(User user,int steps) {		
 		
 		int finalSquare = user.getCurrentSquare() + steps;
 		int currentSquare = user.getCurrentSquare();
@@ -351,7 +315,6 @@ public class GameBoard extends JPanel {
 		}
 		else if( currentSquare+steps <= (user.getBoardCoordinateY()+1)*10 ) {
 			
-			//int diceResult = steps;
 			user.setCurrentSquare(currentSquare+steps);
 			
 			steps = ( user.getBoardCoordinateY()%2==0 )? steps : -steps;
@@ -362,14 +325,15 @@ public class GameBoard extends JPanel {
 			
 			steps = ( steps>=0 )? steps : -steps;
 			int newDelay = this.delay + ( this.movesFor1Square*this.period )*steps;
-			System.out.println("__ New Delay-> "+ newDelay);
 			
 			if( containsALadder( user.getCurrentSquare() ) ) {
 				
+				System.out.println("YOU ARE IN A LADDER");
 				upTheLadder(user, newDelay, this.period);
 			}
 			else if( containsASnake( user.getCurrentSquare() ) ) {
 				
+				System.out.println("YOU ARE IN A SNAKE");
 				downTheSnake(user, newDelay);
 			}
 			
@@ -380,29 +344,22 @@ public class GameBoard extends JPanel {
 			System.out.println("BI-dimensional move (HORIZONTAL+VERTICAL MOVES)");
 			
 			int temp = (user.getBoardCoordinateY()+1)*10 - currentSquare;			
-			//System.out.println("temp: -> "+temp);
 			
 			steps = ( user.getBoardCoordinateY()%2==0 )? temp : -temp;
 			movePlayerHorizontally(user, steps, this.delay, this.period);			
 			user.setCurrentSquare(currentSquare+temp);
-			
-			//System.out.println("steps: -> "+steps);
 
 			int newDelay = this.delay + ( this.movesFor1Square*this.period )*temp;
 			movePlayerVertically(user, 1, newDelay, this.period);			
 			user.setCurrentSquare(user.getCurrentSquare()+1);
-			
-			//System.out.println("finalSquare: -> "+finalSquare);
-			//System.out.println("temp: -> "+temp);
-			
+				
 			steps = finalSquare - user.getCurrentSquare();
 			System.out.println("steps: -> "+steps);			
 			user.setCurrentSquare(user.getCurrentSquare()+steps);
 			
 			newDelay = this.delay + ( this.movesFor1Square*this.period )*(temp+1) ;
 			steps = ( user.getBoardCoordinateY()%2==0 )? steps : -steps;
-			
-			//System.out.println("steps: -> "+steps);
+						
 			movePlayerHorizontally(user, steps, newDelay, this.period);
 			
 			System.out.println("currentsquare: -> "+user.getCurrentSquare());
@@ -412,10 +369,12 @@ public class GameBoard extends JPanel {
 			
 			if( containsALadder( user.getCurrentSquare() ) ) {
 				
+				System.out.println("YOU ARE IN A LADDER");
 				upTheLadder(user, newDelay, this.period);
 			}
 			else if( containsASnake( user.getCurrentSquare() ) ) {
 				
+				System.out.println("YOU ARE IN A SNAKE");
 				downTheSnake(user, newDelay);
 			}
 			
@@ -513,18 +472,12 @@ public class GameBoard extends JPanel {
 			verticalLine=true;
 			m=0;
 		}else {
-			System.out.println( ">>>>>>>>>>>>>>>>> ");
 			verticalLine = false;
 			m = ((double) (pointB[1]-pointA[1]) ) / (pointB[0]-pointA[0]) ;
 		}
+
 		
-		System.out.println( "m-> "+m);
-		Integer k=1, l=10;
-		int p = (pointB[1]-pointA[1]), b= (pointB[0]-pointA[0]);
-		double u=(1/2);
-		System.out.println( "k+l-> "+p+" "+b+" "+u);
-		
-		// creationn odf the task() that
+		// creationn of the tasks (Runnable) that are goona move the avatar
 		
 		if( verticalLine ) {
 			
@@ -532,13 +485,14 @@ public class GameBoard extends JPanel {
 			int temp2[] = determineSquareCoords( ladderArray[1] );
 			
 			int steps = temp2[1] - temp[1];
-			System.out.println( "_____ !!!!!!!! ____ 1" );
+			System.out.println( "___ AVATR CLIMING UP THE LADDER ___" );
+			System.out.println( "_____currentSquare -> "+ user.getCurrentSquare() );
+			
 			user.setCurrentSquare( ladderArray[1] );
 			movePlayerVertically(user, steps, delay, period);
 		}
 		else {
 			
-			int current_x = pointA[0], current_y = pointA[1];
 			int final_x = pointB[0], final_y = pointB[1];
 			
 			Runnable myTask = new Runnable() {
@@ -546,19 +500,12 @@ public class GameBoard extends JPanel {
 				int ctr=1;
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
-					
-					System.out.println( "_____ user.getX()-> " +  user.getX());
-					System.out.println( "_____ user.getY()-> " +  user.getY());
+					// TODO Auto-generated method stub					
 					
 					if( m<0 && user.getX()<final_x && user.getY()>final_y ) {
 						
 						int x= user.getX() + (ctr*2);
-						double y = m*(x - pointA[0]) + pointA[1];
-						
-						System.out.println( "_____ !!!!!!!! ___  x-> " + x );
-						System.out.println( "_____ !!!!!!!! ___  Y-> " + y );
-						System.out.println( "_____ !!!!!!!! ___2" );
+						double y = m*(x - pointA[0]) + pointA[1];				
 						
 						user.setLocation( x, (int) y);
 						
@@ -579,17 +526,16 @@ public class GameBoard extends JPanel {
 							
 							user.setLocation( pointB[0], pointB[1] );
 						}
-						ctr++;
-						System.out.println( "_____ !!!!!!!! ___1_1" );
+						ctr++;						
 					}
 					else {
 						
 						int temp[] = determineSquareCoords( ladderArray[1] );
 						user.setBoardCoordinates( temp[0], temp[1] );
 						user.setCurrentSquare( ladderArray[1] );
-						//user.set
-						System.out.println( "__ currentSquare -> "+ user.getCurrentSquare() );
-						System.out.println( "_____ !!!!!!!! ______ 3" );
+
+						System.out.println( "___ AVATAR CLIMING UP THE LADDER ___" );
+						System.out.println( "_____currentSquare -> "+ user.getCurrentSquare() );
 						
 						scheduler.notifyAll();
 					}
@@ -611,7 +557,6 @@ public class GameBoard extends JPanel {
 						try {
 							this.wait();
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}	
 					}
@@ -619,9 +564,7 @@ public class GameBoard extends JPanel {
 				}
 			};//END Runnable canceler
 			
-			scheduler.schedule(canceler, 1, TimeUnit.MILLISECONDS);
-			
-			
+			scheduler.schedule(canceler, 1, TimeUnit.MILLISECONDS);						
 			
 		} // END of the else
 		
@@ -663,7 +606,7 @@ public class GameBoard extends JPanel {
 		int  inicialPoint[] = squareCoordInPixels( snakeArray[0] );
 		int  finalPoint[] = squareCoordInPixels( snakeArray[1] );
 		
-		System.out.println("______ marca ante de explosion task ______");
+		System.out.println("______ marca antes de explosion task ______");
 		
 		Runnable explosionTask = new Runnable() {
 			
@@ -679,7 +622,7 @@ public class GameBoard extends JPanel {
 				}
 				else {
 					explosionGif.setVisible(false);
-					System.out.println("lol1");
+					System.out.println("__ EXPLOSION TASK COMPLETED __");
 					scheduler.notifyAll();
 				}						
 				ctr++;														
@@ -717,7 +660,9 @@ public class GameBoard extends JPanel {
 					user.setBoardCoordinates( temp[0], temp[1] );
 					user.setCurrentSquare( snakeArray[1] );
 					user.setVisible(true);
-					System.out.println("lol2");
+					
+					System.out.println("__ EGG TASK COMPLETED __");
+					System.out.println("____ currentSquare -> "+ user.getCurrentSquare() );
 					scheduler.notifyAll();
 				}
 				ctr++; 				
@@ -747,8 +692,7 @@ public class GameBoard extends JPanel {
 		
 		
 		scheduler.schedule(canceler, 1, TimeUnit.MILLISECONDS);
-		
-		
+				
 	}// END method downTheSnake
 
 	

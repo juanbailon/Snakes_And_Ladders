@@ -9,24 +9,22 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.crypto.spec.DHPrivateKeySpec;
 import javax.swing.ImageIcon;
 
-import gameModels.Bot;
 import gameModels.Dice;
 import gameModels.GameBoard;
 import gameModels.User;
 
 public class ControlGame {
 	
-	public GameBoard gameBoard;
-	//private Dice dice;
-	private int humans, bots, currentTurn;
+	private GameBoard gameBoard;
+	private Dice dice;
+	private int humans, bots;
+	private int currentTurn;
 	private final ImageIcon boardImage = new ImageIcon( getClass().getResource("/images/playing_board.png") );
 	private Lock lock = new ReentrantLock();
 	private Condition waitForTurn = lock.newCondition();
-	private List< Future<?> > botsFuturesList;
-	private ExecutorService botsThreads;
+	private ExecutorService playersThreads;
 	
 	
 	public ControlGame() {
@@ -34,59 +32,71 @@ public class ControlGame {
 		this.humans = 1;
 		this.bots = 2;
 		this.currentTurn = 1;
-		//this.dice = dice;
 		this.gameBoard = new GameBoard(boardImage, 640, 590);
-		this.botsFuturesList = new ArrayList<>();
+
 		
 		gameBoard.fillPlayersLists(humans, bots);
 		
 		gameBoard.setAvatarsSize(35, 55);
-		gameBoard.addPlayerToBoard( gameBoard.getHumanPlayers().get(0) , 15);
-		gameBoard.addPlayerToBoard( gameBoard.getBotPlayers().get(0) , 2);
-		gameBoard.addPlayerToBoard( gameBoard.getBotPlayers().get(1) , 56);
+		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 15);
+		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(1) , 2);
+		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(2) , 56);
 		
+	}
+	
+	public void startHumans() {
+		
+		playersThreads = Executors.newFixedThreadPool(2);
+		Future<?> handle;
+		
+		for (User myHuman : gameBoard.getPlayers() ) {
+			
+			if( !myHuman.isBot() ) {
+				myHuman.setControlGame(this);
+				handle =  playersThreads.submit( myHuman );
+			}
+		}
+		
+		playersThreads.shutdown();
 	}
 	
 	public void startBots() {
 		
-		botsThreads = Executors.newFixedThreadPool(2);
+		playersThreads = Executors.newFixedThreadPool( bots );
 		Future<?> handle;
 		
-		for (Bot myBot : gameBoard.getBotPlayers() ) {
-			
-			System.out.println("bot square -> "+ myBot.getCurrentSquare() );
-			System.out.println("bot turn -> "+ myBot.getTurn() );
+		for (User myBot : gameBoard.getPlayers() ) {			
 			
 			if( myBot.isBot() ) {
 				myBot.setControlGame(this);
-				handle =  botsThreads.submit( myBot );
-				botsFuturesList.add(handle);
+				handle =  playersThreads.submit( myBot );
 			}
 		}
 		
-		botsThreads.shutdown();
+		playersThreads.shutdown();
 	}
 	
 	
-	public void turns(User user, int steps) {
+	public void turns(User user) {
 		
 		lock.lock();
-		System.out.println("el bot hizo lock... "+ user.getTurn());
 		
 		try {
 			while( user.getTurn() != currentTurn ) {
-				System.out.println("el bot esta esperando.... "+ user.getTurn());
 				waitForTurn.await();
 			}
 			
-			System.out.println("el bot paso el while  ___ "+ user.getTurn());
+			int result = dice.rollDice();
+			dice.spinDice();
 			
-			gameBoard.moveForward(user, steps);
+			while( !dice.getSpinDiceTask().isDone() ) { }
 			
-			while( !gameBoard.getLastPreformedMovementTask().isDone() ) {
-				
-			}
+			dice.setDiceValue(result);
 			
+			gameBoard.moveForward(user, result);
+			
+			while( !gameBoard.getLastPreformedMovementTask().isDone() ) { }
+						
 			currentTurn++;
 			waitForTurn.signalAll();
 			
@@ -101,10 +111,6 @@ public class ControlGame {
 	}
 
 	
-	public List<Future<?>> getBotsFuturesList() {
-		return botsFuturesList;
-	}
-
 	public int getCurrentTurn() {
 		return currentTurn;
 	}
@@ -116,7 +122,18 @@ public class ControlGame {
 	public GameBoard getGameBoard() {
 		return gameBoard;
 	}
-	
+
+	public void setGameBoard(GameBoard gameBoard) {
+		this.gameBoard = gameBoard;
+	}
+
+	public Dice getDice() {
+		return dice;
+	}
+
+	public void setDice(Dice dice) {
+		this.dice = dice;
+	}
 	
 
 }
