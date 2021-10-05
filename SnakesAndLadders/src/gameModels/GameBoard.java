@@ -13,12 +13,15 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import gameViews.GameGUI;
+
 
 public class GameBoard extends JPanel {
 
 	public static int FIRTS_SQUARE_X=95, FIRTS_SQUARE_Y=473, DELTA_X=47, DELTA_Y=47;
 	
 	private final int  totalAvatarIcons=5;
+	private GameGUI gameGUI;
 	private ImageIcon backgroundImage;
 	private JLabel playingBoard, eggGif, explosionGif;
 	private  List< User > players;
@@ -310,6 +313,15 @@ public class GameBoard extends JPanel {
 			steps = ( user.getBoardCoordinateY()%2==0 )? 100-currentSquare : -(100-currentSquare);
 			movePlayerHorizontally(user, steps, this.delay, this.period);
 			user.setCurrentSquare(100);
+			
+			gameGUI.getDiceButton().removeMouseListener( gameGUI.getEscucha() );
+			
+			if(user.isBot)
+				gameGUI.getTrophy().setText("WINNER -> BOT_" + user.getTurn() );
+			else
+				gameGUI.getTrophy().setText("WINNER -> YOU");
+			
+			gameGUI.getTrophy().setVisible(true);
 			
 			System.out.println("GAME FINISH");
 		}
@@ -696,7 +708,14 @@ public class GameBoard extends JPanel {
 	}// END method downTheSnake
 
 	
-	
+	public GameGUI getGameGUI() {
+		return gameGUI;
+	}
+
+	public void setGameGUI(GameGUI gameGUI) {
+		this.gameGUI = gameGUI;
+	}
+
 	public ScheduledFuture<?> getLastPreformedMovementTask() {
 		return lastPreformedMovementTask;
 	}

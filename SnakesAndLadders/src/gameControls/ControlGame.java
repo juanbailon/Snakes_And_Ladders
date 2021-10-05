@@ -14,11 +14,13 @@ import javax.swing.ImageIcon;
 import gameModels.Dice;
 import gameModels.GameBoard;
 import gameModels.User;
+import gameViews.GameGUI;
 
 public class ControlGame {
 	
 	private GameBoard gameBoard;
 	private Dice dice;
+	private GameGUI gameGUI;
 	private int humans, bots;
 	private int currentTurn;
 	private final ImageIcon boardImage = new ImageIcon( getClass().getResource("/images/playing_board.png") );
@@ -27,20 +29,27 @@ public class ControlGame {
 	private ExecutorService playersThreads;
 	
 	
-	public ControlGame() {
+	public ControlGame(GameGUI gameGUI) {
 		
 		this.humans = 1;
 		this.bots = 2;
 		this.currentTurn = 1;
 		this.gameBoard = new GameBoard(boardImage, 640, 590);
-
+		this.gameGUI = gameGUI;
 		
 		gameBoard.fillPlayersLists(humans, bots);
 		
+		//gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 1);
+		
+		/*
 		gameBoard.setAvatarsSize(35, 55);
-		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 15);
+		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 0);
+		
+		System.out.println("~~~~~~~ "+ gameBoard.getPlayers().get(0).getBoardCoordinateX());
+		
 		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(1) , 2);
 		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(2) , 56);
+		*/
 		
 	}
 	
@@ -86,6 +95,24 @@ public class ControlGame {
 				waitForTurn.await();
 			}
 			
+			if(!user.isVisible())
+				user.setVisible(true);
+				
+			if( user.getTurn() == 1 ) {
+				gameGUI.getDiceButton().removeMouseListener( gameGUI.getEscucha() );
+			}
+			else if( user.getTurn() == 2 ) {
+				gameGUI.getArrow().setLocation( gameGUI.getArrow().getX() ,  gameGUI.getArrow().getY() + 83 );
+			}
+			else if( user.getTurn() == 3 ) {
+				gameGUI.getArrow().setLocation( gameGUI.getArrow().getX() ,  gameGUI.getArrow().getY() + 83 );
+			}
+			
+			
+			if( user.getCurrentSquare() == 0 )			
+				gameBoard.addPlayerToBoard(user, 1);
+			
+			
 			int result = dice.rollDice();
 			dice.spinDice();
 			
@@ -103,13 +130,40 @@ public class ControlGame {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
-			if( currentTurn > humans+bots )
+			
+			if( currentTurn > humans+bots ) {
 				currentTurn=1;
+				gameGUI.getArrow().setLocation( 5, 125 );
+				gameGUI.getDiceButton().addMouseListener( gameGUI.getEscucha() );
+			}
 			lock.unlock();
 		}
 		
 	}
 
+	
+	public void restart() {
+		
+		int ctr=0;
+		
+		for (User user : gameBoard.getPlayers() ) {
+			 
+			user.setVisible(false);
+			gameBoard.addPlayerToBoard(user, 1);
+			
+			if(ctr==0)
+				user.setVisible(true);
+			
+			ctr++;
+		}
+		
+		if( currentTurn != 1 )
+			gameGUI.getDiceButton().addMouseListener( gameGUI.getEscucha() );		
+		
+		currentTurn=1;
+		gameGUI.getArrow().setLocation( 5, 125 );
+		
+	}
 	
 	public int getCurrentTurn() {
 		return currentTurn;
