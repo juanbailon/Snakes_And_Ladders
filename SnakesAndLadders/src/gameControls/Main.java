@@ -1,3 +1,4 @@
+package gameControls;
 import java.awt.EventQueue;
 
 import gameViews.GameGUI;

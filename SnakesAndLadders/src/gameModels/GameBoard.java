@@ -1,3 +1,7 @@
+/*
+ * Author:  JUAN JOSE BAILON
+ *
+ */
 package gameModels;
 
 import java.awt.Color;
@@ -16,8 +20,14 @@ import javax.swing.JPanel;
 import gameViews.GameGUI;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class GameBoard. this class establish the playing board image and all the methods
+ * 						that are necessary to move the avatar around the board
+ */
 public class GameBoard extends JPanel {
 
+	
 	public static int FIRTS_SQUARE_X=95, FIRTS_SQUARE_Y=473, DELTA_X=47, DELTA_Y=47;
 	
 	private final int  totalAvatarIcons=5;
@@ -25,14 +35,17 @@ public class GameBoard extends JPanel {
 	private ImageIcon backgroundImage;
 	private JLabel playingBoard, eggGif, explosionGif;
 	private  List< User > players;
-	public ScheduledExecutorService scheduler;
+	
+	private ScheduledExecutorService scheduler;
 	private int squaresWithLadders[][] , squaresWithSnakes[][];
 	private int delay=450, period=20, movesFor1Square=24;
 	private final int durationEggGif = 1000, durationExplosionGif = 1440; // time in miliseconds
 	private ScheduledFuture<?> lastPreformedMovementTask;
 	
 	
-	
+	/**
+	 * Instantiates a new game board.
+	 */
 	public GameBoard() {
 		
 		this.backgroundImage = new ImageIcon( getClass().getResource( "/images/playing_board.png" ) );
@@ -45,6 +58,13 @@ public class GameBoard extends JPanel {
 		this.setBackground(Color.CYAN);		
 	}
 	
+	/**
+	 * Instantiates a new game board.
+	 *
+	 * @param img the img
+	 * @param _width the width
+	 * @param _height the height
+	 */
 	public GameBoard(ImageIcon img, int _width, int _height) {
 	
 		this.backgroundImage = img;
@@ -57,6 +77,10 @@ public class GameBoard extends JPanel {
 		this.setBackground(Color.CYAN);		
 	}
 	
+	
+	/**
+	 * Inits the game board. initiates all the necessary components 
+	 */
 	public void initGameBoard() {
 		
 		playingBoard = new JLabel();
@@ -99,6 +123,12 @@ public class GameBoard extends JPanel {
 		
 	}
 	
+	/**
+	 * Sets the avatars size.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 */
 	public void setAvatarsSize(int width, int height) {
 		
 		for (User user : players) {
@@ -106,6 +136,12 @@ public class GameBoard extends JPanel {
 		}				
 	}
 	
+	/**
+	 * Sets the egg gif size.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 */
 	public void setEggGifSize(int width, int height) {
 		
 		ImageIcon eggIcon = (ImageIcon) eggGif.getIcon();
@@ -114,6 +150,12 @@ public class GameBoard extends JPanel {
 		eggGif.setIcon( eggIcon );		
 	}
 	
+	/**
+	 * Sets the explosion gif size.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 */
 	public void setExplosionGifSize(int width, int height) {
 		
 		ImageIcon explosionIcon = (ImageIcon) explosionGif.getIcon();				
@@ -123,6 +165,12 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Adds the player to board. shows/puts the players avatar in the specify position (square)
+	 *
+	 * @param playersIndex the players index
+	 * @param square the square
+	 */
 	public void addPlayerToBoard(int playersIndex, int square) {
 		
 		int temp[] = determineSquareCoords(square);
@@ -139,6 +187,12 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Adds the player to board. shows/puts the players avatar in the specify position (square)
+	 *
+	 * @param user the user
+	 * @param square the square
+	 */
 	public void addPlayerToBoard(User user, int square) {
 		
 		int temp[] = determineSquareCoords(square);
@@ -153,11 +207,22 @@ public class GameBoard extends JPanel {
 		this.add(user, 0);						 
 	}
 	
+	/**
+	 * Gets the players.
+	 *
+	 * @return the players
+	 */
 	public List<User> getPlayers() {
 		return players;
 	}
 	
 
+	/**
+	 * Fill players lists. adds the given amount of users (bots and/or humans) to the list
+	 *
+	 * @param humans the humans
+	 * @param bots the bots
+	 */
 	public void fillPlayersLists( int humans, int bots ) {		
 		
 		Random random = new Random();
@@ -184,6 +249,14 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Move player horizontally. moves the players avater in a horizontal direction
+	 *
+	 * @param user the user
+	 * @param steps the steps
+	 * @param delay the delay
+	 * @param period the period
+	 */
 	public  void movePlayerHorizontally(User user, int steps, int delay, int period) {		
 		
 		int current_x = FIRTS_SQUARE_X + DELTA_X*user.getBoardCoordinateX() ;
@@ -245,6 +318,14 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Move player vertically. moves the players avater in a vertical direction
+	 *
+	 * @param user the user
+	 * @param steps the steps
+	 * @param delay the delay
+	 * @param period the period
+	 */
 	public void movePlayerVertically(User user, int steps, int delay, int period) {
 		
 		int current_x = FIRTS_SQUARE_X + DELTA_X*user.getBoardCoordinateX() ;
@@ -303,6 +384,12 @@ public class GameBoard extends JPanel {
 	
 	
 	
+	/**
+	 * Move forward. moves the player forward, in the order of the squares that are in the playing board image 
+	 *
+	 * @param user the user
+	 * @param steps the steps
+	 */
 	public void moveForward(User user,int steps) {		
 		
 		int finalSquare = user.getCurrentSquare() + steps;
@@ -396,6 +483,12 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Contains A ladder. determines if the given square has the base of a ladder
+	 *
+	 * @param square the square
+	 * @return true, if successful
+	 */
 	public boolean containsALadder(int square) {
 		
 		boolean flag=false;
@@ -410,6 +503,16 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Determine square coords. determines the board coordinates for the given square
+	 * example:
+	 * 		determineSquareCoords(1) -> [0,0]
+	 *		determineSquareCoords(100) -> [0,9]
+	 *		determineSquareCoords(24) -> [3,2]
+	 *
+	 * @param square the square
+	 * @return the int[]
+	 */
 	public int[] determineSquareCoords(int square) {
 		
 		int coords[] = new int[2]; 		
@@ -441,6 +544,12 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Square coord in pixels. determines the the coordinates in pixels from the begining of the panel (this panel)
+	 *
+	 * @param square the square
+	 * @return the int[]
+	 */
 	public int[] squareCoordInPixels( int square ) {
 		
 		int coordInPx[] = new int[2];
@@ -454,6 +563,13 @@ public class GameBoard extends JPanel {
 	
 	
 	
+	/**
+	 * Up the ladder. moves the player up the ladder
+	 *
+	 * @param user the user
+	 * @param delay the delay
+	 * @param period the period
+	 */
 	public void upTheLadder(User user, int delay, int period) {
 		
 		Integer[] ladderArray = new Integer[2];
@@ -584,6 +700,12 @@ public class GameBoard extends JPanel {
 	
 	
 	
+	/**
+	 * Contains A snake. determines is the given square has the head and mouth of a snake
+	 *
+	 * @param square the square
+	 * @return true, if successful
+	 */
 	public boolean containsASnake(int square) {
 		
 		boolean flag=false;
@@ -598,6 +720,12 @@ public class GameBoard extends JPanel {
 	}
 	
 	
+	/**
+	 * Down the snake. moves the players form the head of the snakes down to the end of its tail
+	 *
+	 * @param user the user
+	 * @param delay the delay
+	 */
 	public void downTheSnake(User user, int delay) {
 				
 		Integer snakeArray[] = new Integer[2];
@@ -708,14 +836,29 @@ public class GameBoard extends JPanel {
 	}// END method downTheSnake
 
 	
+	/**
+	 * Gets the game GUI.
+	 *
+	 * @return the game GUI
+	 */
 	public GameGUI getGameGUI() {
 		return gameGUI;
 	}
 
+	/**
+	 * Sets the game GUI.
+	 *
+	 * @param gameGUI the new game GUI
+	 */
 	public void setGameGUI(GameGUI gameGUI) {
 		this.gameGUI = gameGUI;
 	}
 
+	/**
+	 * Gets the last preformed movement task.
+	 *
+	 * @return the last preformed movement task
+	 */
 	public ScheduledFuture<?> getLastPreformedMovementTask() {
 		return lastPreformedMovementTask;
 	}

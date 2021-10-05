@@ -1,3 +1,6 @@
+/*
+ * Author: JUAN JOSE BAILON
+ */
 package gameViews;
 
 import java.awt.BorderLayout;
@@ -5,7 +8,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,28 +17,31 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import gameControls.ControlGame;
 import gameModels.Dice;
 import gameModels.User;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class GameGUI.
+ */
 public class GameGUI extends JFrame {
 	
-	//public static int FIRTS_SQUARE_X=95, FIRTS_SQUARE_Y=473, DELTA_X=47, DELTA_Y=47;
-	
 	private Escucha escucha;
-	private JPanel leftPanel, rightPanel, playersPanel, players_SubPanel, woodenPlankPanel;
+	private JPanel leftPanel, rightPanel, playersPanel, players_SubPanel;
 	private Dice dice;
-	private JLabel startPlank, diceButton, restartButton, trophy;
-	private JLabel humanAvatar, bot1Avatar, bot2Avatar, arrow, avatarsInPlankArray[];
+	private JLabel diceButton, restartButton, trophy;
+	private JLabel humanAvatar, bot1Avatar, bot2Avatar, arrow;
 	private ImageIcon imageIcon;
 	private ControlGame controlGame;
-	private boolean firstDiceRoll=true;
 	
 	private int avatarsInPlayersPanelSize[] = new int[] {40, 64};
 	
 	
+	/**
+	 * Instantiates a new game GUI.
+	 */
 	public GameGUI() {
 		
 		imageIcon = new ImageIcon();
@@ -46,9 +51,7 @@ public class GameGUI extends JFrame {
 		controlGame.getGameBoard().setAvatarsSize(35, 55);
 		
 		controlGame.getGameBoard().addPlayerToBoard( controlGame.getGameBoard().getPlayers().get(0), 1);
-		
-		avatarsInPlankArray = new JLabel[2];
-		
+				
 		intiGUI();
 		
 		this.setSize(900+25, 620+10);
@@ -61,17 +64,18 @@ public class GameGUI extends JFrame {
 	}
 	
 	
+	/**
+	 * Inti GUI.
+	 */
 	public void intiGUI() {
-		
-		
+				
 		//escucha
 		escucha = new Escucha();
 		
 		
 		// left panel
 		leftPanel = new JPanel();
-		leftPanel.setLayout( new BorderLayout() );
-		//leftPanel.setLayout( new GridLayout(2, 1) );
+		leftPanel.setLayout( new BorderLayout() );		
 		leftPanel.setMinimumSize( new Dimension(200, 600));
 		leftPanel.setSize(200, 650);
 		leftPanel.setBackground(Color.red);
@@ -81,11 +85,12 @@ public class GameGUI extends JFrame {
 		//auxLabel.setSize(500, 10);
 		leftPanel.add(auxLabel, BorderLayout.PAGE_START );
 		
+		
+		
 		//players panel
 		playersPanel = new JPanel();
 		playersPanel.setBackground(Color.CYAN.darker());
 		playersPanel.setLayout(null);
-		//playersPanel.setLayout( new BoxLayout(playersPanel, BoxLayout.Y_AXIS ) );
 		playersPanel.setSize(500, 200);
 		playersPanel.setAlignmentX( Component.CENTER_ALIGNMENT );
 		leftPanel.add( playersPanel, BorderLayout.CENTER );
@@ -101,17 +106,13 @@ public class GameGUI extends JFrame {
 		
 		//human avatar
 		humanAvatar = new JLabel();
-		imageIcon = controlGame.getGameBoard().getPlayers().get(0).getAvatar();
-		 
-		//avatarsInPlankArray[0] = new JLabel(imageIcon);
-		
+		imageIcon = controlGame.getGameBoard().getPlayers().get(0).getAvatar();		
 		imageIcon = Dice.resizeImg(avatarsInPlayersPanelSize[0], avatarsInPlayersPanelSize[1], imageIcon, true);
 		humanAvatar.setIcon( imageIcon );
 		humanAvatar.setText("YOU");
 		humanAvatar.setOpaque(false);
 		humanAvatar.setVerticalTextPosition( SwingConstants.BOTTOM );
 		humanAvatar.setHorizontalTextPosition( SwingConstants.CENTER );
-		//humanAvatar.setAlignmentY( Component.BOTTOM_ALIGNMENT );
 		humanAvatar.setAlignmentX( Component.CENTER_ALIGNMENT );
 		players_SubPanel.add(humanAvatar);
 		
@@ -119,38 +120,24 @@ public class GameGUI extends JFrame {
 		//bot1 avatar
 		bot1Avatar = new JLabel();
 		imageIcon = controlGame.getGameBoard().getPlayers().get(1).getAvatar();
-
-		//avatarsInPlankArray[1] = controlGame.getGameBoard().getPlayers().get(1);
-		//avatarsInPlankArray[1] = new JLabel(imageIcon);
-		
 		imageIcon = Dice.resizeImg(avatarsInPlayersPanelSize[0], avatarsInPlayersPanelSize[1], imageIcon, true);
 		bot1Avatar.setIcon(imageIcon);
 		bot1Avatar.setText("BOT_1");
 		bot1Avatar.setVerticalTextPosition( SwingConstants.BOTTOM );
 		bot1Avatar.setHorizontalTextPosition( SwingConstants.CENTER );
-		//bot1Avatar.setVerticalAlignment( SwingConstants.BOTTOM );
 		bot1Avatar.setAlignmentX( Component.CENTER_ALIGNMENT );
 		players_SubPanel.add(bot1Avatar);
 		
 		
-		//System.out.println( "EEEEEEEEEEE - >"+bot1Avatar.getVerticalTextPosition() +" "+iconHeight);
-		System.out.println( "EEEEEEEEEEE 2 - >"+bot1Avatar.getHorizontalTextPosition() );
-		
 		//bot2 avatar
 		bot2Avatar = new JLabel();
 		imageIcon = controlGame.getGameBoard().getPlayers().get(2).getAvatar();
-		
-		//avatarsInPlankArray[2] = controlGame.getGameBoard().getPlayers().get(2);
-		//avatarsInPlankArray[2] = new JLabel(imageIcon);
-		
 		imageIcon = Dice.resizeImg(avatarsInPlayersPanelSize[0], avatarsInPlayersPanelSize[1], imageIcon, true);
 		bot2Avatar.setIcon(imageIcon);
 		bot2Avatar.setText("BOT_2");
 		bot2Avatar.setVerticalTextPosition( SwingConstants.BOTTOM );
 		bot2Avatar.setHorizontalTextPosition( SwingConstants.CENTER );
-		//bot2Avatar.setAlignmentY( Component.CENTER_ALIGNMENT );
 		bot2Avatar.setAlignmentX( Component.CENTER_ALIGNMENT );
-		//bot2Avatar.setHorizontalAlignment( SwingConstants.R );
 		players_SubPanel.add(bot2Avatar);
 		
 		
@@ -174,6 +161,7 @@ public class GameGUI extends JFrame {
 		trophy.setHorizontalTextPosition( SwingConstants.CENTER );
 		trophy.setVisible(false);
 		playersPanel.add(trophy,0);
+		
 		
 		
 		//right panel
@@ -221,19 +209,39 @@ public class GameGUI extends JFrame {
 	}	
 
 	
+	/**
+	 * Gets the dice button.
+	 *
+	 * @return the dice button
+	 */
 	public JLabel getDiceButton() {
 		return diceButton;
 	}
 
 
+	/**
+	 * Gets the arrow.
+	 *
+	 * @return the arrow
+	 */
 	public JLabel getArrow() {
 		return arrow;
 	}
 
+	/**
+	 * Gets the escucha.
+	 *
+	 * @return the escucha
+	 */
 	public Escucha getEscucha() {
 		return escucha;
 	}
 
+	/**
+	 * Gets the trophy.
+	 *
+	 * @return the trophy
+	 */
 	public JLabel getTrophy() {
 		return trophy;
 	}

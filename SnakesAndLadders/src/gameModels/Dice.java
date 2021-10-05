@@ -1,3 +1,8 @@
+/*
+ * Author:  JUAN JOSE BAILON
+ * 		    JUAN JOSE REVELO
+ * 		    ANGELO SALAZAR
+ */
 package gameModels;
 
 import java.awt.Dimension;
@@ -13,19 +18,33 @@ import javax.swing.JLabel;
 
 import gameControls.ControlGame;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Dice.
+ */
 public class Dice extends JLabel {
 	
+	/** The dice width. */
 	public int DICE_WIDTH;
+	
+	/** The dice height. */
 	public int DICE_HEIGHT;
 	
 	private int currentFace;
 	private ImageIcon diceIcon, rotatingDice;
 	private Random random;
 	private ControlGame controlGame = null;
-	public ScheduledExecutorService scheduler;
+	
+	private ScheduledExecutorService scheduler;
 	private ScheduledFuture<?> spinDiceTask;
 	
 	
+	/**
+	 * Instantiates a new dice.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 */
 	public Dice(int width, int height) {
 	
 		this.DICE_WIDTH = width;
@@ -46,6 +65,9 @@ public class Dice extends JLabel {
 	}
 	
 	
+	/**
+	 * Spin dice. sets the icon with a moving dice (gif) 
+	 */
 	public void spinDice() {
 		
 		
@@ -93,6 +115,11 @@ public class Dice extends JLabel {
 	}
 	
 	
+	/**
+	 * Roll dice. returns a value between 1 and 6
+	 *
+	 * @return the int
+	 */
 	public synchronized int rollDice() {
 		
 		int num = random.nextInt(6)+1;
@@ -100,6 +127,11 @@ public class Dice extends JLabel {
 		return num;
 	}
 	
+	/**
+	 * Sets the dice value. 
+	 *
+	 * @param value the new dice value
+	 */
 	public void setDiceValue(int value) {
 		
 		diceIcon = new ImageIcon("src/images/dice_"+ value +".png");
@@ -109,6 +141,15 @@ public class Dice extends JLabel {
 	}
 	
 	
+	/**
+	 * Resize img.
+	 *
+	 * @param newWidth the new width
+	 * @param newHeight the new height
+	 * @param img the img
+	 * @param smooth the smooth
+	 * @return the image icon
+	 */
 	public static ImageIcon resizeImg(int newWidth, int newHeight, ImageIcon img, boolean smooth) {
 		
 		Image tempImage;
@@ -126,33 +167,68 @@ public class Dice extends JLabel {
 	}
 	
 
+	/**
+	 * Gets the current face.
+	 *
+	 * @return the current face
+	 */
 	public int getCurrentFace() {
 		return currentFace;
 	}
 
+	/**
+	 * Sets the current face.
+	 *
+	 * @param currentFace the new current face
+	 */
 	public void setCurrentFace(int currentFace) {
 		this.currentFace = currentFace;
 	}
 
+	/**
+	 * Gets the image.
+	 *
+	 * @return the image
+	 */
 	public ImageIcon getImage() {
 		return diceIcon;
 	}
 
+	/**
+	 * Sets the image.
+	 *
+	 * @param image the new image
+	 */
 	public void setImage(ImageIcon image) {
 		this.diceIcon = image;
 		this.setIcon(image);
 	}
 
 
+	/**
+	 * Gets the control game.
+	 *
+	 * @return the control game
+	 */
 	public ControlGame getControlGame() {
 		return controlGame;
 	}
 
+	/**
+	 * Sets the control game.
+	 *
+	 * @param controlGame the new control game
+	 */
 	public void setControlGame(ControlGame controlGame) {
 		this.controlGame = controlGame;
 	}
 
 
+	/**
+	 * Gets the spin dice task.
+	 *
+	 * @return the spin dice task
+	 */
 	public ScheduledFuture<?> getSpinDiceTask() {
 		return spinDiceTask;
 	}

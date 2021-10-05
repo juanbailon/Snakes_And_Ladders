@@ -1,7 +1,9 @@
+/*
+ * Author: JUAN JOSE BAILON
+ */
 package gameControls;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -16,6 +18,11 @@ import gameModels.GameBoard;
 import gameModels.User;
 import gameViews.GameGUI;
 
+
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ControlGame.
+ */
 public class ControlGame {
 	
 	private GameBoard gameBoard;
@@ -29,6 +36,11 @@ public class ControlGame {
 	private ExecutorService playersThreads;
 	
 	
+	/**
+	 * Instantiates a new control game.
+	 *
+	 * @param gameGUI the game GUI
+	 */
 	public ControlGame(GameGUI gameGUI) {
 		
 		this.humans = 1;
@@ -39,20 +51,11 @@ public class ControlGame {
 		
 		gameBoard.fillPlayersLists(humans, bots);
 		
-		//gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 1);
-		
-		/*
-		gameBoard.setAvatarsSize(35, 55);
-		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(0) , 0);
-		
-		System.out.println("~~~~~~~ "+ gameBoard.getPlayers().get(0).getBoardCoordinateX());
-		
-		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(1) , 2);
-		gameBoard.addPlayerToBoard( gameBoard.getPlayers().get(2) , 56);
-		*/
-		
 	}
 	
+	/**
+	 * Start humans. start the users that are NOT BOTS as a thread
+	 */
 	public void startHumans() {
 		
 		playersThreads = Executors.newFixedThreadPool(2);
@@ -69,6 +72,9 @@ public class ControlGame {
 		playersThreads.shutdown();
 	}
 	
+	/**
+	 * Start bots. start the users that ARE BOTS as a thread
+	 */
 	public void startBots() {
 		
 		playersThreads = Executors.newFixedThreadPool( bots );
@@ -86,6 +92,12 @@ public class ControlGame {
 	}
 	
 	
+	/**
+	 * Turns. manage the order in which the users are gonna move and perform their actions,
+	 * 			manege the synchronization so that the different threads (users) do NOT interfere with each other
+	 *
+	 * @param user the user
+	 */
 	public void turns(User user) {
 		
 		lock.lock();
@@ -142,6 +154,9 @@ public class ControlGame {
 	}
 
 	
+	/**
+	 * Restart. restart the game
+	 */
 	public void restart() {
 		
 		int ctr=0;
@@ -165,26 +180,56 @@ public class ControlGame {
 		
 	}
 	
+	/**
+	 * Gets the current turn.
+	 *
+	 * @return the current turn
+	 */
 	public int getCurrentTurn() {
 		return currentTurn;
 	}
 
+	/**
+	 * Sets the current turn.
+	 *
+	 * @param currentTurn the new current turn
+	 */
 	public void setCurrentTurn(int currentTurn) {
 		this.currentTurn = currentTurn;
 	}
 
+	/**
+	 * Gets the game board.
+	 *
+	 * @return the game board
+	 */
 	public GameBoard getGameBoard() {
 		return gameBoard;
 	}
 
+	/**
+	 * Sets the game board.
+	 *
+	 * @param gameBoard the new game board
+	 */
 	public void setGameBoard(GameBoard gameBoard) {
 		this.gameBoard = gameBoard;
 	}
 
+	/**
+	 * Gets the dice.
+	 *
+	 * @return the dice
+	 */
 	public Dice getDice() {
 		return dice;
 	}
 
+	/**
+	 * Sets the dice.
+	 *
+	 * @param dice the new dice
+	 */
 	public void setDice(Dice dice) {
 		this.dice = dice;
 	}
